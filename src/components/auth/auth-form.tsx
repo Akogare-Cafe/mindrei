@@ -41,7 +41,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     setError("");
 
     try {
-      if (isSignUp) {
+      if (isSignUp && signUp) {
         const result = await signUp.create({
           emailAddress: email,
           password,
@@ -56,7 +56,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
           setPendingVerification(true);
         }
-      } else {
+      } else if (signIn) {
         const result = await signIn.create({
           identifier: email,
           password,
