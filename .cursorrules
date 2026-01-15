@@ -1,0 +1,83 @@
+# MindRei Cursor Rules
+
+## Icon Rules - CRITICAL
+- ONLY use `lucide-react` for icons
+- NEVER use emojis, unicode symbols, HTML entities, or other icon libraries
+- Example: `import { Mic, Brain } from "lucide-react"`
+
+## Code Style
+- TypeScript for ALL files
+- Do NOT add comments unless explicitly requested
+- Do NOT delete existing comments unless explicitly requested
+- Use custom Pixel* components (PixelCard, PixelButton, PixelBadge, PixelInput)
+
+## Design Tokens
+Reference `src/lib/design-tokens.ts` for:
+- Colors (teal primary, amber accent, warm backgrounds)
+- Typography (Space Grotesk for headings, Noto Sans for body)
+- Spacing, radius, shadows, animations
+
+## CSS Classes (from globals.css)
+- `.fantasy-card` - Glass morphism cards with hover effects
+- `.liquid-glass` - Strong glass effect
+- `.glass-panel` - Subtle glass effect
+- `.teal-glow` / `.orange-glow` - Glow effects
+- `.calm-transition` - Smooth 600ms transitions
+- `.calm-fade-in` / `.calm-scale-in` - Entry animations
+- `.bento-grid` / `.bento-item` - Grid layouts
+- `.shimmer` - Loading shimmer effect
+
+## SEO Requirements
+Every page MUST have:
+- Proper `<title>` via Next.js metadata
+- Meta description (150-160 chars)
+- Open Graph tags (og:title, og:description, og:image, og:url)
+- Twitter Card tags (twitter:card, twitter:title, twitter:description)
+- Semantic HTML structure (header, main, section, article, footer)
+- JSON-LD structured data for rich snippets
+
+## Performance Requirements
+- Use Next.js `<Image>` component for all images
+- Implement lazy loading for below-fold content
+- Use `dynamic()` imports for heavy components
+- Minimize client-side JavaScript where possible
+- Prefer Server Components over Client Components
+
+## Mobile Responsiveness
+- Mobile-first CSS approach
+- Test breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px)
+- Touch targets minimum 44x44px
+- Base font size 16px minimum on mobile
+- Use responsive Tailwind classes: `text-sm md:text-base lg:text-lg`
+
+## Component Patterns
+```tsx
+// Use PixelCard for cards
+<PixelCard rarity="uncommon">
+  <PixelCardHeader>
+    <PixelCardTitle>Title</PixelCardTitle>
+  </PixelCardHeader>
+  <PixelCardContent>Content</PixelCardContent>
+</PixelCard>
+
+// Use PixelButton for buttons
+<PixelButton variant="default" size="lg">
+  Get Started
+</PixelButton>
+```
+
+## File Organization
+- Pages: `src/app/`
+- Marketing pages: `src/app/(marketing)/`
+- Components: `src/components/`
+- Marketing components: `src/components/marketing/`
+- UI primitives: `src/components/ui/`
+
+## Tech Stack
+- Next.js 16 (App Router)
+- React 19
+- Tailwind CSS v4
+- Convex (backend)
+- Clerk (auth)
+- Framer Motion (animations)
+- lucide-react (icons)

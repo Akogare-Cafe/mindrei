@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <!-- EVA-00 inspired gradient -->
+    <linearGradient id="evaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5B6EE1"/>
+      <stop offset="50%" stop-color="#8B9AD8"/>
+      <stop offset="100%" stop-color="#3B4BA8"/>
+    </linearGradient>
+    <!-- Red accent gradient -->
+    <linearGradient id="redAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E53935"/>
+      <stop offset="100%" stop-color="#EF5350"/>
+    </linearGradient>
+    <!-- Glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle with EVA blue -->
+  <circle cx="256" cy="256" r="240" fill="url(#evaGradient)" opacity="0.15"/>
+  
+  <!-- Outer ring - EVA armor style -->
+  <circle cx="256" cy="256" r="220" fill="none" stroke="url(#evaGradient)" stroke-width="8"/>
+  
+  <!-- Inner geometric shape - inspired by EVA-00 head/visor -->
+  <path d="M256 80 L380 180 L380 340 L256 440 L132 340 L132 180 Z" 
+        fill="url(#evaGradient)" opacity="0.3" stroke="url(#evaGradient)" stroke-width="4"/>
+  
+  <!-- Mind/Brain neural network pattern -->
+  <g filter="url(#glow)">
+    <!-- Central node (mind) -->
+    <circle cx="256" cy="220" r="45" fill="url(#evaGradient)"/>
+    
+    <!-- Neural connections -->
+    <line x1="256" y1="265" x2="180" y2="340" stroke="#8B9AD8" stroke-width="4" stroke-linecap="round"/>
+    <line x1="256" y1="265" x2="332" y2="340" stroke="#8B9AD8" stroke-width="4" stroke-linecap="round"/>
+    <line x1="256" y1="265" x2="256" y2="360" stroke="#8B9AD8" stroke-width="4" stroke-linecap="round"/>
+    <line x1="256" y1="175" x2="190" y2="130" stroke="#8B9AD8" stroke-width="4" stroke-linecap="round"/>
+    <line x1="256" y1="175" x2="322" y2="130" stroke="#8B9AD8" stroke-width="4" stroke-linecap="round"/>
+    
+    <!-- Secondary nodes -->
+    <circle cx="180" cy="340" r="28" fill="url(#evaGradient)"/>
+    <circle cx="332" cy="340" r="28" fill="url(#evaGradient)"/>
+    <circle cx="256" cy="360" r="28" fill="url(#evaGradient)"/>
+    <circle cx="190" cy="130" r="22" fill="url(#evaGradient)"/>
+    <circle cx="322" cy="130" r="22" fill="url(#evaGradient)"/>
+    
+    <!-- Tertiary nodes -->
+    <circle cx="140" cy="380" r="16" fill="#8B9AD8"/>
+    <circle cx="220" cy="400" r="16" fill="#8B9AD8"/>
+    <circle cx="292" cy="400" r="16" fill="#8B9AD8"/>
+    <circle cx="372" cy="380" r="16" fill="#8B9AD8"/>
+    
+    <!-- More connections -->
+    <line x1="180" y1="340" x2="140" y2="380" stroke="#8B9AD8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="180" y1="340" x2="220" y2="400" stroke="#8B9AD8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="332" y1="340" x2="372" y2="380" stroke="#8B9AD8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="332" y1="340" x2="292" y2="400" stroke="#8B9AD8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="256" y1="360" x2="220" y2="400" stroke="#8B9AD8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="256" y1="360" x2="292" y2="400" stroke="#8B9AD8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Red accent eye/sensor - Rei's red eyes -->
+  <circle cx="256" cy="220" r="18" fill="url(#redAccent)" filter="url(#glow)"/>
+  <circle cx="256" cy="220" r="8" fill="#ffffff"/>
+</svg>
