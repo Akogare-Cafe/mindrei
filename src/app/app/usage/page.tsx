@@ -10,21 +10,6 @@ import { Activity, CreditCard, TrendingUp, Zap, Crown, Shield, ArrowUpRight } fr
 import { useState } from "react";
 import { STRIPE_PLANS } from "@/lib/stripe";
 
-export const metadata = {
-  title: "Usage & Billing | MindRei",
-  description: "Track your usage, manage your subscription, and upgrade your plan to unlock more features for AI-powered mind mapping.",
-  openGraph: {
-    title: "Usage & Billing | MindRei",
-    description: "Track your usage, manage your subscription, and upgrade your plan to unlock more features for AI-powered mind mapping.",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Usage & Billing | MindRei",
-    description: "Track your usage, manage your subscription, and upgrade your plan to unlock more features for AI-powered mind mapping.",
-  },
-};
-
 export default function UsagePage() {
   const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);

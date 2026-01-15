@@ -5,8 +5,26 @@ import { action } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import OpenAI from "openai/index.js";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+let openaiInstance: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openaiInstance) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY environment variable is required");
+    }
+    openaiInstance = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openaiInstance;
+}
+
+const openai = new Proxy({} as OpenAI, {
+  get: (target, prop) => {
+    const client = getOpenAI();
+    const value = client[prop as keyof OpenAI];
+    return typeof value === 'function' ? value.bind(client) : value;
+  }
 });
 
 // Model configuration - can be overridden via env

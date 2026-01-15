@@ -32,7 +32,7 @@ export async function POST(req: Request) {
       userId: user._id,
     });
 
-    if (!subscription || !subscription.stripeCustomerId) {
+    if (!subscription || subscription.plan === "free" || !("stripeCustomerId" in subscription) || !subscription.stripeCustomerId) {
       return NextResponse.json(
         { error: "No active subscription found" },
         { status: 404 }

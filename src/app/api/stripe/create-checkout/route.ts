@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { createCheckoutSession, createOrGetCustomer } from "@/lib/stripe";
 
 export async function POST(req: Request) {
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { user } = await auth();
+    const user = await currentUser();
     const email = user?.emailAddresses[0]?.emailAddress;
     const name = user?.fullName;
 
