@@ -5,6 +5,7 @@ import { ConvexClientProvider } from "@/components/providers/convex-provider";
 import { ClerkClientProvider } from "@/components/providers/clerk-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Analytics } from "@vercel/analytics/react";
+import { PWARegister } from "@/components/pwa-register";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -34,6 +35,15 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-touch-icon.png",
   },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MindRei",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({
@@ -52,6 +62,7 @@ export default function RootLayout({
           </ConvexClientProvider>
         </ClerkClientProvider>
         <Analytics />
+        <PWARegister />
       </body>
     </html>
   );

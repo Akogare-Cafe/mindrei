@@ -56,6 +56,12 @@ export interface MindMapNode {
   order: number;
 }
 
+export interface MindMapEdge {
+  tempId: string;
+  sourceTempId: string;
+  targetTempId: string;
+}
+
 export const generateMindMap = action({
   args: {
     text: v.string(),
@@ -562,6 +568,334 @@ Return ONLY valid JSON.`;
       return JSON.parse(cleanedContent);
     } catch {
       return { suggestions: [] };
+    }
+  },
+});
+
+export const generateFromYouTube = action({
+  args: {
+    videoId: v.string(),
+  },
+  handler: async (_, args): Promise<{ title: string; nodes: MindMapNode[]; summary: string }> => {
+    const prompt = `You are analyzing a YouTube video with ID: "${args.videoId}"
+
+Based on this video ID, imagine the likely content of an educational or informational YouTube video and create a comprehensive mind map structure.
+
+Consider common YouTube video formats:
+- Tutorial videos: Step-by-step instructions
+- Educational content: Key concepts and explanations
+- Reviews: Pros, cons, features
+- Vlogs: Timeline of events or topics discussed
+- Lectures: Main topics and subtopics
+
+Return a JSON object with:
+1. "title": A descriptive title for the mind map (max 50 chars)
+2. "summary": A brief summary of the video content (1-2 sentences)
+3. "nodes": An array of nodes where each node has:
+   - "tempId": A unique string ID (use format "node_0", "node_1", etc.)
+   - "parentTempId": The tempId of the parent node (null for root node)
+   - "label": A short label for the node (max 30 chars)
+   - "content": Optional longer description
+   - "level": The depth level (0 for root, 1 for first children, etc.)
+   - "order": The order among siblings (0, 1, 2, etc.)
+
+Rules:
+- Create a single root node (level 0) representing the video topic
+- Include key sections, timestamps, or chapters as level 1 nodes
+- Add details and subtopics as level 2-3 nodes
+- Maximum 3 levels deep
+- Maximum 15 nodes total
+- Keep labels concise and meaningful
+
+Return ONLY valid JSON, no markdown or explanation.`;
+
+    const response = await openai.chat.completions.create({
+      model: AI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are a YouTube video analyzer that creates structured mind maps from video content. Return only valid JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error("No response from AI");
+    }
+
+    try {
+      const cleanedContent = content
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "")
+        .trim();
+      
+      return JSON.parse(cleanedContent);
+    } catch {
+      throw new Error("Failed to parse AI response");
+    }
+  },
+});
+
+export const generateFromUrl = action({
+  args: {
+    url: v.string(),
+  },
+  handler: async (_, args): Promise<{ title: string; nodes: MindMapNode[]; summary: string }> => {
+    const prompt = `You are given a URL. Imagine you have access to the content of this webpage and create a mind map structure based on what a typical article at this URL would contain.
+
+URL: "${args.url}"
+
+Based on the URL structure and domain, create a relevant mind map. For example:
+- News sites: Create a map about the likely topic
+- Blog posts: Create a map about the subject matter
+- Documentation: Create a technical overview map
+
+Return a JSON object with:
+1. "title": A concise title for the mind map (max 50 chars)
+2. "summary": A brief summary of what the page likely contains (1-2 sentences)
+3. "nodes": An array of nodes where each node has:
+   - "tempId": A unique string ID (use format "node_0", "node_1", etc.)
+   - "parentTempId": The tempId of the parent node (null for root node)
+   - "label": A short label for the node (max 30 chars)
+   - "content": Optional longer description
+   - "level": The depth level (0 for root, 1 for first children, etc.)
+   - "order": The order among siblings (0, 1, 2, etc.)
+
+Rules:
+- Create a single root node (level 0) that represents the main topic
+- Group related concepts as children
+- Maximum 3 levels deep
+- Maximum 12 nodes total
+- Keep labels concise and meaningful
+
+Return ONLY valid JSON, no markdown or explanation.`;
+
+    const response = await openai.chat.completions.create({
+      model: AI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are a mind map generator that creates structured content from URLs. Return only valid JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error("No response from AI");
+    }
+
+    try {
+      const cleanedContent = content
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "")
+        .trim();
+      
+      return JSON.parse(cleanedContent);
+    } catch {
+      throw new Error("Failed to parse AI response");
+    }
+  },
+});
+
+export const generateFromPDF = action({
+  args: {
+    pdfText: v.string(),
+    title: v.optional(v.string()),
+  },
+  handler: async (_, args): Promise<{ title: string; nodes: MindMapNode[]; edges: MindMapEdge[] }> => {
+    const textPreview = args.pdfText.slice(0, 15000);
+    
+    const prompt = `Analyze this PDF document and create a comprehensive mind map structure.
+
+Document content:
+${textPreview}
+
+Create a hierarchical mind map with:
+1. A central topic (infer from content if no title provided)
+2. Main sections as level 1 nodes
+3. Key points as level 2 nodes
+4. Supporting details as level 3 nodes
+
+Return a JSON object with:
+- "title": The document title or inferred topic
+- "nodes": Array of nodes with tempId, label (max 40 chars), content (optional description), level (0-3), order
+- "edges": Array of edges with tempId, sourceTempId, targetTempId
+
+Return ONLY valid JSON. Create 10-20 nodes for a comprehensive overview.`;
+
+    const response = await openai.chat.completions.create({
+      model: AI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are a document analyzer that creates structured mind maps from PDF content. Return only valid JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.5,
+      max_tokens: 3000,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error("No response from AI");
+    }
+
+    try {
+      const cleanedContent = content
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "")
+        .trim();
+      
+      return JSON.parse(cleanedContent);
+    } catch {
+      throw new Error("Failed to parse AI response");
+    }
+  },
+});
+
+export const deepResearch = action({
+  args: {
+    topic: v.string(),
+    depth: v.optional(v.union(v.literal("basic"), v.literal("detailed"), v.literal("comprehensive"))),
+  },
+  handler: async (_, args): Promise<{ title: string; nodes: MindMapNode[]; edges: MindMapEdge[]; sources: string[] }> => {
+    const depth = args.depth || "detailed";
+    const nodeCount = depth === "basic" ? "8-12" : depth === "detailed" ? "15-25" : "25-40";
+    
+    const prompt = `Conduct deep research on the topic: "${args.topic}"
+
+Create a ${depth} mind map with ${nodeCount} nodes covering:
+1. Definition and overview
+2. Key concepts and principles
+3. Historical context or background
+4. Current applications or relevance
+5. Related topics and connections
+6. Common misconceptions (if any)
+7. Future trends or developments
+
+Return a JSON object with:
+- "title": The research topic
+- "nodes": Array of nodes with tempId, label (max 40 chars), content (detailed description), level (0-3), order
+- "edges": Array of edges with tempId, sourceTempId, targetTempId
+- "sources": Array of suggested source types (e.g., "Academic journals", "Industry reports")
+
+Return ONLY valid JSON. Make the content educational and well-researched.`;
+
+    const response = await openai.chat.completions.create({
+      model: AI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are a research assistant that creates comprehensive, educational mind maps. Include factual, well-organized information. Return only valid JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.6,
+      max_tokens: 4000,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error("No response from AI");
+    }
+
+    try {
+      const cleanedContent = content
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "")
+        .trim();
+      
+      return JSON.parse(cleanedContent);
+    } catch {
+      throw new Error("Failed to parse AI response");
+    }
+  },
+});
+
+export const generateFromAudio = action({
+  args: {
+    transcript: v.string(),
+    title: v.optional(v.string()),
+    audioType: v.optional(v.union(v.literal("meeting"), v.literal("lecture"), v.literal("podcast"), v.literal("interview"), v.literal("other"))),
+  },
+  handler: async (_, args): Promise<{ title: string; nodes: MindMapNode[]; edges: MindMapEdge[]; summary: string }> => {
+    const audioType = args.audioType || "other";
+    const transcriptPreview = args.transcript.slice(0, 12000);
+    
+    const typeSpecificInstructions = {
+      meeting: "Focus on action items, decisions made, and key discussion points.",
+      lecture: "Organize by main topics, key concepts, and important examples.",
+      podcast: "Capture main themes, guest insights, and memorable quotes.",
+      interview: "Structure around questions asked and key responses.",
+      other: "Extract main topics and organize hierarchically.",
+    };
+    
+    const prompt = `Analyze this ${audioType} transcript and create a mind map.
+
+Transcript:
+${transcriptPreview}
+
+${typeSpecificInstructions[audioType]}
+
+Return a JSON object with:
+- "title": The inferred title or topic
+- "nodes": Array of nodes with tempId, label (max 40 chars), content (key points), level (0-3), order
+- "edges": Array of edges with tempId, sourceTempId, targetTempId
+- "summary": A 2-3 sentence summary of the content
+
+Return ONLY valid JSON. Create 10-20 nodes.`;
+
+    const response = await openai.chat.completions.create({
+      model: AI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are an audio content analyzer that creates structured mind maps from transcripts. Return only valid JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.5,
+      max_tokens: 3000,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error("No response from AI");
+    }
+
+    try {
+      const cleanedContent = content
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "")
+        .trim();
+      
+      return JSON.parse(cleanedContent);
+    } catch {
+      throw new Error("Failed to parse AI response");
     }
   },
 });

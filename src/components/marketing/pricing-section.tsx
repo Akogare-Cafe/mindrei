@@ -15,9 +15,10 @@ const plans = [
     price: "$0",
     period: "forever",
     features: [
-      "10 mind maps per month",
-      "Basic voice recognition",
-      "Standard AI generation",
+      "20 mind maps per month",
+      "Real-time voice recognition",
+      "AI-powered generation",
+      "10 templates",
       "Export to PNG",
       "Community support",
     ],
@@ -27,18 +28,54 @@ const plans = [
     rarity: "common" as const,
   },
   {
+    name: "Student",
+    description: "For students & educators",
+    price: "$4",
+    period: "per month",
+    features: [
+      "100 mind maps per month",
+      "100 AI credits per month",
+      "Text & URL to mind map",
+      "PDF & Audio import",
+      "All export formats",
+      "Email support",
+    ],
+    cta: "Verify Student Status",
+    href: "/sign-up?plan=student",
+    popular: false,
+    rarity: "common" as const,
+  },
+  {
+    name: "Starter",
+    description: "For casual creators",
+    price: "$6",
+    period: "per month",
+    features: [
+      "100 mind maps per month",
+      "50 AI credits per month",
+      "Text & URL to mind map",
+      "Export to PNG, Markdown",
+      "Email support",
+      "No watermarks",
+    ],
+    cta: "Start Free Trial",
+    href: "/sign-up?plan=starter",
+    popular: false,
+    rarity: "common" as const,
+  },
+  {
     name: "Pro",
-    description: "For individuals who think big",
+    description: "For power users",
     price: "$12",
     period: "per month",
     features: [
       "Unlimited mind maps",
-      "Advanced voice recognition",
+      "500 AI credits per month",
       "GPT-4o powered generation",
-      "Export to PNG, PDF, JSON",
+      "All export formats",
       "Priority support",
-      "Custom node colors",
-      "Collaboration (up to 3)",
+      "Collaboration (up to 5)",
+      "Custom templates",
     ],
     cta: "Start Free Trial",
     href: "/sign-up?plan=pro",
@@ -48,7 +85,7 @@ const plans = [
   {
     name: "Team",
     description: "For teams that collaborate",
-    price: "$29",
+    price: "$24",
     period: "per user/month",
     features: [
       "Everything in Pro",
@@ -58,7 +95,6 @@ const plans = [
       "SSO authentication",
       "API access",
       "Dedicated support",
-      "Custom integrations",
     ],
     cta: "Contact Sales",
     href: "/contact?plan=team",
@@ -100,7 +136,7 @@ export function PricingSection() {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}

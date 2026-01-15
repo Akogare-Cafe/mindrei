@@ -10,10 +10,21 @@ import {
   Upload,
   X,
   FileJson,
+  FileText,
+  Table,
+  List,
   Check,
   AlertCircle,
   Loader2,
+  Copy,
 } from "lucide-react";
+import {
+  exportToMarkdown,
+  exportToCSV,
+  exportToOutline,
+  downloadFile,
+  copyToClipboard,
+} from "@/lib/export-utils";
 import { PixelButton } from "@/components/pixel-button";
 import { PixelInput } from "@/components/pixel-input";
 import { PixelCard, PixelCardContent, PixelCardHeader, PixelCardTitle } from "@/components/pixel-card";
@@ -32,7 +43,9 @@ export function ExportImportDialog({
   onImportSuccess,
 }: ExportImportDialogProps) {
   const [mode, setMode] = useState<"export" | "import">(mindMapId ? "export" : "import");
+  const [exportFormat, setExportFormat] = useState<"json" | "markdown" | "csv" | "outline">("json");
   const [isExporting, setIsExporting] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importTitle, setImportTitle] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -52,21 +65,97 @@ export function ExportImportDialog({
     setError(null);
 
     try {
-      const jsonString = JSON.stringify(exportData, null, 2);
-      const blob = new Blob([jsonString], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${exportData.mindMap.title.replace(/[^a-z0-9]/gi, "_")}_mindmap.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const title = exportData.mindMap.title;
+      const safeTitle = title.replace(/[^a-z0-9]/gi, "_");
+      
+      const mindMapData = {
+        title,
+        nodes: exportData.nodes.map(n => ({
+          id: n.exportId,
+          label: n.label,
+          content: n.content,
+          level: n.level,
+          parentId: n.parentExportId,
+        })),
+        edges: exportData.edges.map((e, i) => ({
+          id: `edge_${i}`,
+          sourceId: e.sourceExportId,
+          targetId: e.targetExportId,
+        })),
+      };
+
+      switch (exportFormat) {
+        case "markdown": {
+          const md = exportToMarkdown(mindMapData);
+          downloadFile(md, `${safeTitle}.md`, "text/markdown");
+          break;
+        }
+        case "csv": {
+          const csv = exportToCSV(mindMapData);
+          downloadFile(csv, `${safeTitle}.csv`, "text/csv");
+          break;
+        }
+        case "outline": {
+          const outline = exportToOutline(mindMapData);
+          downloadFile(outline, `${safeTitle}.txt`, "text/plain");
+          break;
+        }
+        default: {
+          const jsonString = JSON.stringify(exportData, null, 2);
+          downloadFile(jsonString, `${safeTitle}_mindmap.json`, "application/json");
+        }
+      }
       setSuccess("Mind map exported successfully!");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to export");
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const handleCopyToClipboard = async () => {
+    if (!exportData) return;
+    setError(null);
+
+    try {
+      const title = exportData.mindMap.title;
+      
+      const mindMapData = {
+        title,
+        nodes: exportData.nodes.map(n => ({
+          id: n.exportId,
+          label: n.label,
+          content: n.content,
+          level: n.level,
+          parentId: n.parentExportId,
+        })),
+        edges: exportData.edges.map((e, i) => ({
+          id: `edge_${i}`,
+          sourceId: e.sourceExportId,
+          targetId: e.targetExportId,
+        })),
+      };
+
+      let content = "";
+      switch (exportFormat) {
+        case "markdown":
+          content = exportToMarkdown(mindMapData);
+          break;
+        case "csv":
+          content = exportToCSV(mindMapData);
+          break;
+        case "outline":
+          content = exportToOutline(mindMapData);
+          break;
+        default:
+          content = JSON.stringify(exportData, null, 2);
+      }
+
+      await copyToClipboard(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to copy");
     }
   };
 
@@ -220,18 +309,62 @@ export function ExportImportDialog({
                       </p>
                     </div>
 
-                    <PixelButton
-                      onClick={handleExport}
-                      disabled={isExporting}
-                      className="w-full"
-                    >
-                      {isExporting ? (
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      ) : (
-                        <Download className="w-4 h-4 mr-2" />
-                      )}
-                      Download JSON
-                    </PixelButton>
+                    <div className="grid grid-cols-4 gap-2 mb-4">
+                      <button
+                        onClick={() => setExportFormat("json")}
+                        className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center gap-1 ${exportFormat === "json" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+                      >
+                        <FileJson className="w-5 h-5" />
+                        <span className="text-xs">JSON</span>
+                      </button>
+                      <button
+                        onClick={() => setExportFormat("markdown")}
+                        className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center gap-1 ${exportFormat === "markdown" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+                      >
+                        <FileText className="w-5 h-5" />
+                        <span className="text-xs">Markdown</span>
+                      </button>
+                      <button
+                        onClick={() => setExportFormat("csv")}
+                        className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center gap-1 ${exportFormat === "csv" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+                      >
+                        <Table className="w-5 h-5" />
+                        <span className="text-xs">CSV</span>
+                      </button>
+                      <button
+                        onClick={() => setExportFormat("outline")}
+                        className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center gap-1 ${exportFormat === "outline" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+                      >
+                        <List className="w-5 h-5" />
+                        <span className="text-xs">Outline</span>
+                      </button>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <PixelButton
+                        onClick={handleExport}
+                        disabled={isExporting}
+                        className="flex-1"
+                      >
+                        {isExporting ? (
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        ) : (
+                          <Download className="w-4 h-4 mr-2" />
+                        )}
+                        Download
+                      </PixelButton>
+                      <PixelButton
+                        variant="outline"
+                        onClick={handleCopyToClipboard}
+                        disabled={isExporting}
+                      >
+                        {copied ? (
+                          <Check className="w-4 h-4" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </PixelButton>
+                    </div>
                   </>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">

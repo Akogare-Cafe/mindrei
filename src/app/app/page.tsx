@@ -5,13 +5,25 @@ import { useUser, SignInButton } from "@clerk/nextjs";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, Trash2, Clock, LogIn, Zap, Sparkles, PanelRightOpen, PanelRightClose, Share2, Download, Upload, Users, AlertCircle } from "lucide-react";
+import { Brain, Trash2, Clock, LogIn, Zap, Sparkles, PanelRightOpen, PanelRightClose, Share2, Download, Upload, Users, AlertCircle, FileText, Link, Youtube, Layout, Keyboard, Search, Mic, Presentation } from "lucide-react";
 import { UserDropdown } from "@/components/user-dropdown";
 import { LiveVoiceRecorder } from "@/components/live-voice-recorder";
 import { AnimatedMindMap } from "@/components/animated-mind-map";
 import { TopicInsightsPanel } from "@/components/topic-insights-panel";
 import { ShareDialog } from "@/components/share-dialog";
 import { ExportImportDialog } from "@/components/export-import-dialog";
+import { TextToMindMapDialog } from "@/components/text-to-mindmap-dialog";
+import { UrlToMindMapDialog } from "@/components/url-to-mindmap-dialog";
+import { TemplatesDialog } from "@/components/templates-dialog";
+import { YouTubeToMindMapDialog } from "@/components/youtube-to-mindmap-dialog";
+import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { OnboardingTour, useOnboardingTour } from "@/components/onboarding-tour";
+import { CollaborationPresence } from "@/components/collaboration-presence";
+import { PDFToMindMapDialog } from "@/components/pdf-to-mindmap-dialog";
+import { DeepResearchDialog } from "@/components/deep-research-dialog";
+import { AudioToMindMapDialog } from "@/components/audio-to-mindmap-dialog";
+import { PresentationMode } from "@/components/presentation-mode";
 import { MindMapSkeleton } from "@/components/mind-map-skeleton";
 import { PixelButton } from "@/components/pixel-button";
 import { PixelCard, PixelCardContent, PixelCardHeader, PixelCardTitle } from "@/components/pixel-card";
@@ -28,7 +40,17 @@ export default function HomePage() {
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showExportImportDialog, setShowExportImportDialog] = useState(false);
+  const [showTextToMindMapDialog, setShowTextToMindMapDialog] = useState(false);
+  const [showUrlToMindMapDialog, setShowUrlToMindMapDialog] = useState(false);
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false);
+  const [showYouTubeDialog, setShowYouTubeDialog] = useState(false);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+  const [showPDFDialog, setShowPDFDialog] = useState(false);
+  const [showDeepResearchDialog, setShowDeepResearchDialog] = useState(false);
+  const [showAudioDialog, setShowAudioDialog] = useState(false);
+  const [showPresentationMode, setShowPresentationMode] = useState(false);
   const [isLoadingMap, setIsLoadingMap] = useState(false);
+  const { showTour, setShowTour } = useOnboardingTour();
 
   const getOrCreateUser = useMutation(api.users.getOrCreateUser);
   const currentUser = useQuery(
@@ -130,6 +152,28 @@ export default function HomePage() {
     activeUserId ? { userId: activeUserId } : "skip"
   );
 
+  useKeyboardShortcuts([
+    { key: "n", action: () => setShowTextToMindMapDialog(true), description: "New from text" },
+    { key: "u", action: () => setShowUrlToMindMapDialog(true), description: "New from URL" },
+    { key: "y", action: () => setShowYouTubeDialog(true), description: "New from YouTube" },
+    { key: "t", action: () => setShowTemplatesDialog(true), description: "Browse templates" },
+    { key: "i", action: () => setShowExportImportDialog(true), description: "Import" },
+    { key: "e", action: () => selectedMapId && setShowExportImportDialog(true), description: "Export" },
+    { key: "s", action: () => selectedMapId && setShowShareDialog(true), description: "Share" },
+    { key: "p", action: () => setShowInsightsPanel(prev => !prev), description: "Toggle panel" },
+    { key: "Escape", action: () => {
+      if (showTextToMindMapDialog) setShowTextToMindMapDialog(false);
+      else if (showUrlToMindMapDialog) setShowUrlToMindMapDialog(false);
+      else if (showYouTubeDialog) setShowYouTubeDialog(false);
+      else if (showTemplatesDialog) setShowTemplatesDialog(false);
+      else if (showExportImportDialog) setShowExportImportDialog(false);
+      else if (showShareDialog) setShowShareDialog(false);
+      else if (showKeyboardShortcuts) setShowKeyboardShortcuts(false);
+      else if (selectedMapId) { setSelectedMapId(null); setIsLiveSession(false); }
+    }, description: "Close" },
+    { key: "?", shift: true, action: () => setShowKeyboardShortcuts(true), description: "Help" },
+  ]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
       <header className="border-b border-border/50 sticky top-0 bg-background/80 backdrop-blur-md z-50">
@@ -158,6 +202,23 @@ export default function HomePage() {
           </div>
           
           <div className="flex items-center gap-3">
+            {selectedMapId && activeUserId && currentUser && (
+              <CollaborationPresence
+                mindMapId={selectedMapId}
+                currentUserId={activeUserId}
+                currentUserName={currentUser.name || "You"}
+                currentUserImage={currentUser.imageUrl}
+              />
+            )}
+            <PixelButton
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowKeyboardShortcuts(true)}
+              title="Keyboard shortcuts (Shift + ?)"
+              className="hidden sm:flex"
+            >
+              <Keyboard className="w-4 h-4" />
+            </PixelButton>
             <UserDropdown />
           </div>
         </div>
@@ -294,14 +355,80 @@ export default function HomePage() {
               </PixelCard>
             )}
 
-            <PixelButton
-              variant="outline"
-              className="w-full"
-              onClick={() => setShowExportImportDialog(true)}
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Import Mind Map
-            </PixelButton>
+            <PixelCard>
+              <PixelCardHeader>
+                <PixelCardTitle className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-accent" />
+                  Create from
+                </PixelCardTitle>
+              </PixelCardHeader>
+              <PixelCardContent className="space-y-2">
+                <PixelButton
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setShowTextToMindMapDialog(true)}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Text / Notes
+                </PixelButton>
+                <PixelButton
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setShowUrlToMindMapDialog(true)}
+                >
+                  <Link className="w-4 h-4 mr-2" />
+                  URL / Webpage
+                </PixelButton>
+                <PixelButton
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setShowYouTubeDialog(true)}
+                >
+                  <Youtube className="w-4 h-4 mr-2" />
+                  YouTube Video
+                </PixelButton>
+                <PixelButton
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setShowPDFDialog(true)}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  PDF Document
+                </PixelButton>
+                <PixelButton
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setShowAudioDialog(true)}
+                >
+                  <Mic className="w-4 h-4 mr-2" />
+                  Audio / Video
+                </PixelButton>
+                <PixelButton
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setShowDeepResearchDialog(true)}
+                >
+                  <Search className="w-4 h-4 mr-2" />
+                  Deep Research
+                </PixelButton>
+                <PixelButton
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setShowTemplatesDialog(true)}
+                >
+                  <Layout className="w-4 h-4 mr-2" />
+                  Templates
+                </PixelButton>
+                <PixelButton
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setShowExportImportDialog(true)}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Import JSON
+                </PixelButton>
+              </PixelCardContent>
+            </PixelCard>
           </div>
 
           <div className={showInsightsPanel && selectedMapId ? "lg:col-span-6" : "lg:col-span-9"}>
@@ -357,6 +484,14 @@ export default function HomePage() {
                         title="Export/Import"
                       >
                         <Download className="w-4 h-4" />
+                      </PixelButton>
+                      <PixelButton
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowPresentationMode(true)}
+                        title="Present"
+                      >
+                        <Presentation className="w-4 h-4" />
                       </PixelButton>
                       <PixelButton
                         variant="ghost"
@@ -489,6 +624,106 @@ export default function HomePage() {
           />
         )}
       </AnimatePresence>
+
+      {activeUserId && (
+        <TextToMindMapDialog
+          open={showTextToMindMapDialog}
+          onOpenChange={setShowTextToMindMapDialog}
+          onMindMapCreated={(mapId) => {
+            setSelectedMapId(mapId);
+            setShowTextToMindMapDialog(false);
+          }}
+          userId={activeUserId}
+        />
+      )}
+
+      {activeUserId && (
+        <UrlToMindMapDialog
+          open={showUrlToMindMapDialog}
+          onOpenChange={setShowUrlToMindMapDialog}
+          onMindMapCreated={(mapId: Id<"mindMaps">) => {
+            setSelectedMapId(mapId);
+            setShowUrlToMindMapDialog(false);
+          }}
+          userId={activeUserId}
+        />
+      )}
+
+      {activeUserId && (
+        <TemplatesDialog
+          open={showTemplatesDialog}
+          onOpenChange={setShowTemplatesDialog}
+          onMindMapCreated={(mapId: Id<"mindMaps">) => {
+            setSelectedMapId(mapId);
+            setShowTemplatesDialog(false);
+          }}
+          userId={activeUserId}
+        />
+      )}
+
+      {activeUserId && (
+        <YouTubeToMindMapDialog
+          open={showYouTubeDialog}
+          onOpenChange={setShowYouTubeDialog}
+          onMindMapCreated={(mapId: Id<"mindMaps">) => {
+            setSelectedMapId(mapId);
+            setShowYouTubeDialog(false);
+          }}
+          userId={activeUserId}
+        />
+      )}
+
+      {activeUserId && (
+        <PDFToMindMapDialog
+          open={showPDFDialog}
+          onOpenChange={setShowPDFDialog}
+          onMindMapCreated={(mapId: Id<"mindMaps">) => {
+            setSelectedMapId(mapId);
+            setShowPDFDialog(false);
+          }}
+          userId={activeUserId}
+        />
+      )}
+
+      {activeUserId && (
+        <DeepResearchDialog
+          open={showDeepResearchDialog}
+          onOpenChange={setShowDeepResearchDialog}
+          onMindMapCreated={(mapId: Id<"mindMaps">) => {
+            setSelectedMapId(mapId);
+            setShowDeepResearchDialog(false);
+          }}
+          userId={activeUserId}
+        />
+      )}
+
+      {activeUserId && (
+        <AudioToMindMapDialog
+          open={showAudioDialog}
+          onOpenChange={setShowAudioDialog}
+          onMindMapCreated={(mapId: Id<"mindMaps">) => {
+            setSelectedMapId(mapId);
+            setShowAudioDialog(false);
+          }}
+          userId={activeUserId}
+        />
+      )}
+
+      {showPresentationMode && selectedMapId && (
+        <PresentationMode
+          mindMapId={selectedMapId}
+          onClose={() => setShowPresentationMode(false)}
+        />
+      )}
+
+      <KeyboardShortcutsDialog
+        open={showKeyboardShortcuts}
+        onOpenChange={setShowKeyboardShortcuts}
+      />
+
+      {showTour && (
+        <OnboardingTour onComplete={() => setShowTour(false)} />
+      )}
     </div>
   );
 }
