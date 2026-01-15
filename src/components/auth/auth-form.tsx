@@ -50,8 +50,10 @@ export function AuthForm({ mode }: AuthFormProps) {
         });
 
         if (result.status === "complete") {
-          await setSignUpActive({ session: result.createdSessionId });
-          router.push("/");
+          if (result.createdSessionId) {
+            await setSignUpActive({ session: result.createdSessionId });
+          }
+          router.push("/app");
         } else {
           await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
           setPendingVerification(true);
@@ -63,8 +65,10 @@ export function AuthForm({ mode }: AuthFormProps) {
         });
 
         if (result.status === "complete") {
-          await setSignInActive({ session: result.createdSessionId });
-          router.push("/");
+          if (result.createdSessionId) {
+            await setSignInActive({ session: result.createdSessionId });
+          }
+          router.push("/app");
         }
       }
     } catch (err: unknown) {
@@ -88,8 +92,10 @@ export function AuthForm({ mode }: AuthFormProps) {
       });
 
       if (result.status === "complete") {
-        await setSignUpActive({ session: result.createdSessionId });
-        router.push("/");
+        if (result.createdSessionId) {
+          await setSignUpActive({ session: result.createdSessionId });
+        }
+        router.push("/app");
       }
     } catch (err: unknown) {
       const clerkError = err as { errors?: Array<{ message: string }> };

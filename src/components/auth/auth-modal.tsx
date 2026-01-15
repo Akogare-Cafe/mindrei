@@ -78,7 +78,9 @@ export function AuthModal({ isOpen, onClose, defaultMode = "sign-in" }: AuthModa
         });
 
         if (result.status === "complete") {
-          await setSignUpActive({ session: result.createdSessionId });
+          if (result.createdSessionId) {
+            await setSignUpActive({ session: result.createdSessionId });
+          }
           handleClose();
           router.refresh();
         } else {
@@ -92,7 +94,9 @@ export function AuthModal({ isOpen, onClose, defaultMode = "sign-in" }: AuthModa
         });
 
         if (result.status === "complete") {
-          await setSignInActive({ session: result.createdSessionId });
+          if (result.createdSessionId) {
+            await setSignInActive({ session: result.createdSessionId });
+          }
           handleClose();
           router.refresh();
         }
@@ -118,7 +122,9 @@ export function AuthModal({ isOpen, onClose, defaultMode = "sign-in" }: AuthModa
       });
 
       if (result.status === "complete") {
-        await setSignUpActive({ session: result.createdSessionId });
+        if (result.createdSessionId) {
+          await setSignUpActive({ session: result.createdSessionId });
+        }
         handleClose();
         router.refresh();
       }
