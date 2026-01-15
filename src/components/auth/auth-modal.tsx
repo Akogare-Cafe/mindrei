@@ -69,7 +69,7 @@ export function AuthModal({ isOpen, onClose, defaultMode = "sign-in" }: AuthModa
     setError("");
 
     try {
-      if (isSignUp) {
+      if (isSignUp && signUp) {
         const result = await signUp.create({
           emailAddress: email,
           password,
@@ -85,7 +85,7 @@ export function AuthModal({ isOpen, onClose, defaultMode = "sign-in" }: AuthModa
           await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
           setPendingVerification(true);
         }
-      } else {
+      } else if (signIn) {
         const result = await signIn.create({
           identifier: email,
           password,
