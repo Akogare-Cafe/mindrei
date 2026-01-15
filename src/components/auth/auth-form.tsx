@@ -103,13 +103,13 @@ export function AuthForm({ mode }: AuthFormProps) {
     if (!isLoaded) return;
 
     try {
-      if (isSignUp) {
+      if (isSignUp && signUp) {
         await signUp.authenticateWithRedirect({
           strategy: provider,
           redirectUrl: "/sso-callback",
           redirectUrlComplete: "/",
         });
-      } else {
+      } else if (signIn) {
         await signIn.authenticateWithRedirect({
           strategy: provider,
           redirectUrl: "/sso-callback",
