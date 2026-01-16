@@ -88,10 +88,10 @@ export function useVoiceRecognition(
 
         recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
           const errorMessage = event.error;
-          console.error("Speech recognition error:", errorMessage);
-          onErrorRef.current?.(errorMessage);
           
-          if (errorMessage !== "aborted" && errorMessage !== "no-speech") {
+          if (errorMessage !== "no-speech" && errorMessage !== "aborted") {
+            console.error("Speech recognition error:", errorMessage);
+            onErrorRef.current?.(errorMessage);
             setIsListening(false);
             isListeningRef.current = false;
           }

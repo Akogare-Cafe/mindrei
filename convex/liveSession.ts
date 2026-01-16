@@ -76,6 +76,12 @@ export const addLiveNode = mutation({
       .collect();
     
     const normalizedNewLabel = normalizeLabel(args.label);
+    
+    const rootNode = allNodes.find(node => node.level === 0);
+    if (rootNode && normalizeLabel(rootNode.label) === normalizedNewLabel) {
+      return null;
+    }
+    
     const existingNode = allNodes.find(node => 
       normalizeLabel(node.label) === normalizedNewLabel
     );

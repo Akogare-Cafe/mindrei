@@ -460,17 +460,15 @@ export function LiveVoiceRecorder({
         {!showTopicPrompt && (
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
-              <motion.button
+              <button
                 onClick={isSessionActive ? handleStopSession : handleShowTopicPrompt}
                 className={cn(
                 "relative w-20 h-20 rounded-full flex items-center justify-center",
-                "transition-all duration-300 border-2 shadow-lg",
+                "border-2 shadow-lg",
                 isSessionActive
                   ? "bg-gradient-to-br from-red-500/20 to-orange-500/20 border-red-400 hover:border-red-300"
                   : "bg-gradient-to-br from-primary/10 to-accent/10 border-primary/50 hover:border-primary"
               )}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
             >
               <AnimatePresence mode="wait">
                 {isSessionActive ? (
@@ -494,7 +492,7 @@ export function LiveVoiceRecorder({
                   </motion.div>
                 )}
               </AnimatePresence>
-            </motion.button>
+            </button>
             </div>
 
 
