@@ -17,10 +17,10 @@ import { cleanupTranscript } from "@/lib/text-cleanup";
 // Sentence boundary detection constants
 const SENTENCE_ENDINGS = /[.!?]+\s*$/;
 const CLAUSE_BOUNDARIES = /[,;:]+\s*$/;
-const MIN_WORDS_FOR_PROCESSING = 2;
-const MAX_WORDS_BEFORE_FORCE = 6;
+const MIN_WORDS_FOR_PROCESSING = 1;
+const MAX_WORDS_BEFORE_FORCE = 5;
 const BATCH_DEBOUNCE_MS = 150;
-const INTERIM_PROCESS_THRESHOLD = 4;
+const INTERIM_PROCESS_THRESHOLD = 3;
 
 interface LiveVoiceRecorderProps {
   userId: Id<"users">;
@@ -497,29 +497,6 @@ export function LiveVoiceRecorder({
             </motion.button>
             </div>
 
-            {isSessionActive && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex gap-1 h-6 items-end"
-              >
-                {[...Array(7)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="w-1 bg-gradient-to-t from-primary to-accent rounded-full"
-                    animate={{
-                      height: isListening ? [6, 20, 6] : 6,
-                    }}
-                    transition={{
-                      duration: 0.6,
-                      repeat: Infinity,
-                      delay: i * 0.1,
-                      ease: "easeInOut",
-                    }}
-                  />
-                ))}
-              </motion.div>
-            )}
 
             <div className="text-center">
               <p className="text-base font-semibold text-foreground">

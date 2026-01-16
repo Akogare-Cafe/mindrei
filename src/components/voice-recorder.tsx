@@ -84,7 +84,7 @@ export function VoiceRecorder({
               "relative w-20 h-20 rounded-full flex items-center justify-center",
               "transition-all duration-300",
               isListening
-                ? "bg-primary text-primary-foreground voice-pulse"
+                ? "bg-primary text-primary-foreground"
                 : "bg-secondary text-secondary-foreground hover:bg-secondary/80",
               isProcessing && "opacity-50 cursor-not-allowed"
             )}

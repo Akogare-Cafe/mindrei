@@ -30,6 +30,7 @@ interface AnimatedMindMapProps {
   edges: AnimatedEdge[];
   isLive?: boolean;
   onNodeClick?: (nodeId: string) => void;
+  onNodeDoubleClick?: (nodeId: string) => void;
   onNodeHover?: (nodeId: string | null) => void;
   mindMapId?: Id<"mindMaps"> | null;
   mainTopic?: string;
@@ -65,6 +66,7 @@ interface MemoizedNodeProps {
   index: number;
   isLatest: boolean;
   onNodeClick?: (nodeId: string) => void;
+  onNodeDoubleClick?: (nodeId: string) => void;
   onNodeHover?: (nodeId: string | null) => void;
   onMouseEnter: (e: React.MouseEvent, nodeId: string) => void;
   onMouseLeave: () => void;
@@ -75,6 +77,7 @@ const MemoizedNode = memo(function MemoizedNode({
   index,
   isLatest,
   onNodeClick,
+  onNodeDoubleClick,
   onMouseEnter,
   onMouseLeave,
 }: MemoizedNodeProps) {
@@ -99,6 +102,7 @@ const MemoizedNode = memo(function MemoizedNode({
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => onNodeClick?.(node.id)}
+        onDoubleClick={() => onNodeDoubleClick?.(node.id)}
         onMouseEnter={(e) => onMouseEnter(e, node.id)}
         onMouseLeave={onMouseLeave}
         className="cursor-pointer"
@@ -300,6 +304,7 @@ export function AnimatedMindMap({
   edges,
   isLive = false,
   onNodeClick,
+  onNodeDoubleClick,
   onNodeHover,
   mindMapId,
   mainTopic,
@@ -587,6 +592,7 @@ export function AnimatedMindMap({
                 index={index}
                 isLatest={isLatest}
                 onNodeClick={onNodeClick}
+                onNodeDoubleClick={onNodeDoubleClick}
                 onNodeHover={onNodeHover}
                 onMouseEnter={handleNodeMouseEnter}
                 onMouseLeave={handleNodeMouseLeave}

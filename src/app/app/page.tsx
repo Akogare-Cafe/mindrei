@@ -25,6 +25,7 @@ import { DeepResearchDialog } from "@/components/deep-research-dialog";
 import { AudioToMindMapDialog } from "@/components/audio-to-mindmap-dialog";
 import { PresentationMode } from "@/components/presentation-mode";
 import { MindMapSkeleton } from "@/components/mind-map-skeleton";
+import { SimilarTopicsDialog } from "@/components/similar-topics-dialog";
 import { PixelButton } from "@/components/pixel-button";
 import { PixelCard, PixelCardContent, PixelCardHeader, PixelCardTitle } from "@/components/pixel-card";
 import { PixelBadge } from "@/components/pixel-badge";
@@ -50,6 +51,8 @@ export default function HomePage() {
   const [showAudioDialog, setShowAudioDialog] = useState(false);
   const [showPresentationMode, setShowPresentationMode] = useState(false);
   const [isLoadingMap, setIsLoadingMap] = useState(false);
+  const [showSimilarTopicsDialog, setShowSimilarTopicsDialog] = useState(false);
+  const [selectedNodeForSuggestions, setSelectedNodeForSuggestions] = useState<{ id: string; label: string; content?: string } | null>(null);
   const { showTour, setShowTour } = useOnboardingTour();
 
   const getOrCreateUser = useMutation(api.users.getOrCreateUser);
@@ -125,7 +128,9 @@ export default function HomePage() {
     await deleteMindMap({ id: mapId });
   };
 
-  const animatedNodes = (isLiveSession ? liveData?.nodes : mindMapData?.nodes)?.map((n) => ({
+  const allNodes = (isLiveSession ? liveData?.nodes : mindMapData?.nodes) || [];
+  
+  const animatedNodes = allNodes.map((n) => ({
     id: n._id,
     label: n.label,
     content: n.content,
@@ -134,7 +139,7 @@ export default function HomePage() {
     level: n.level,
     color: n.color || "#c4b5fd",
     parentId: n.parentId,
-  })) || [];
+  }));
 
   const animatedEdges = (isLiveSession ? liveData?.edges : mindMapData?.edges)?.map((e) => ({
     id: e._id,
@@ -146,6 +151,18 @@ export default function HomePage() {
   const hasData = animatedNodes.length > 0;
 
   const activeUserId = currentUser?._id || mockUserId;
+
+  const handleNodeDoubleClick = (nodeId: string) => {
+    const node = allNodes.find(n => n._id === nodeId);
+    if (node) {
+      setSelectedNodeForSuggestions({
+        id: node._id,
+        label: node.label,
+        content: node.content,
+      });
+      setShowSimilarTopicsDialog(true);
+    }
+  };
 
   const sharedMindMaps = useQuery(
     api.collaboration.getSharedMindMaps,
@@ -528,6 +545,7 @@ export default function HomePage() {
                       isLive={isLiveSession}
                       mindMapId={selectedMapId}
                       onNodeHover={setHoveredNodeId}
+                      onNodeDoubleClick={handleNodeDoubleClick}
                       mainTopic={selectedMap?.mainTopic}
                     />
                   </motion.div>
@@ -724,6 +742,26 @@ export default function HomePage() {
       {showTour && (
         <OnboardingTour onComplete={() => setShowTour(false)} />
       )}
+
+      <AnimatePresence>
+        {showSimilarTopicsDialog && selectedNodeForSuggestions && selectedMapId && (
+          <SimilarTopicsDialog
+            nodeId={selectedNodeForSuggestions.id as Id<"nodes">}
+            nodeLabel={selectedNodeForSuggestions.label}
+            nodeContent={selectedNodeForSuggestions.content}
+            mindMapId={selectedMapId}
+            mainTopic={selectedMap?.mainTopic}
+            existingTopics={allNodes.map(n => n.label)}
+            onClose={() => {
+              setShowSimilarTopicsDialog(false);
+              setSelectedNodeForSuggestions(null);
+            }}
+            onTopicAdded={() => {
+              console.log("Topic added successfully");
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

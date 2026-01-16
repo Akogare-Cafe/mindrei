@@ -37,6 +37,7 @@ interface MindMapData {
 interface MindMapCanvasProps {
   data: MindMapData;
   onNodeClick?: (nodeId: string) => void;
+  onNodeDoubleClick?: (nodeId: string) => void;
   onNodeUpdate?: (nodeId: string, data: { label?: string; content?: string }) => void;
 }
 
@@ -55,6 +56,7 @@ const levelColors = [
 export function MindMapCanvas({
   data,
   onNodeClick,
+  onNodeDoubleClick,
   onNodeUpdate,
 }: MindMapCanvasProps) {
   const initialNodes: Node[] = useMemo(
@@ -69,11 +71,12 @@ export function MindMapCanvas({
           color: node.color || levelColors[node.level % levelColors.length],
           level: node.level,
           onClick: () => onNodeClick?.(node._id),
+          onDoubleClick: () => onNodeDoubleClick?.(node._id),
           onUpdate: (updates: { label?: string; content?: string }) =>
             onNodeUpdate?.(node._id, updates),
         },
       })),
-    [data.nodes, onNodeClick, onNodeUpdate]
+    [data.nodes, onNodeClick, onNodeDoubleClick, onNodeUpdate]
   );
 
   const initialEdges: Edge[] = useMemo(

@@ -12,6 +12,7 @@ interface MindMapNodeData {
   color: string;
   level: number;
   onClick?: () => void;
+  onDoubleClick?: () => void;
   onUpdate?: (data: { label?: string; content?: string }) => void;
 }
 
@@ -38,6 +39,10 @@ function MindMapNodeComponent({ data, selected }: NodeProps<MindMapNodeData>) {
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        data.onDoubleClick?.();
+      }}
       className={cn(
         "mind-map-node relative group",
         "bg-card border-2 rounded-xl shadow-lg",
