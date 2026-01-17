@@ -417,11 +417,7 @@ export function LiveVoiceRecorder({
         </div>
 
         {showTopicPrompt && !isSessionActive && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-3 p-4 bg-accent/10 rounded-lg border border-accent/20"
-          >
+          <div className="space-y-3 p-4 bg-accent/10 rounded-lg border border-accent/20">
             <div className="flex items-center gap-2">
               <Target className="w-4 h-4 text-accent" />
               <span className="text-sm font-medium text-foreground">What is the main topic?</span>
@@ -454,7 +450,7 @@ export function LiveVoiceRecorder({
                 Cancel
               </PixelButton>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {!showTopicPrompt && (
@@ -470,28 +466,11 @@ export function LiveVoiceRecorder({
                   : "bg-gradient-to-br from-primary/10 to-accent/10 border-primary/50 hover:border-primary"
               )}
             >
-              <AnimatePresence mode="wait">
-                {isSessionActive ? (
-                  <motion.div
-                    key="recording"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    className="flex items-center justify-center"
-                  >
-                    <Square className="w-6 h-6 text-red-500 fill-red-500" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="idle"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                  >
-                    <Mic className="w-8 h-8 text-primary" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {isSessionActive ? (
+                <Square className="w-6 h-6 text-red-500 fill-red-500" />
+              ) : (
+                <Mic className="w-8 h-8 text-primary" />
+              )}
             </button>
             </div>
 
@@ -510,11 +489,7 @@ export function LiveVoiceRecorder({
         )}
 
         {detectedSpeakers.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-2 p-3 bg-accent/10 rounded-lg border border-accent/20"
-          >
+          <div className="flex items-center gap-2 p-3 bg-accent/10 rounded-lg border border-accent/20">
             <Users className="w-4 h-4 text-accent" />
             <span className="text-sm font-medium text-foreground">Speakers:</span>
             <div className="flex gap-1 flex-wrap">
@@ -528,24 +503,18 @@ export function LiveVoiceRecorder({
                 </PixelBadge>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
 
         {processedTopics.length > 0 && isSessionActive && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-2"
-          >
+          <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Recent Topics
             </p>
             <div className="flex flex-wrap gap-1.5">
               {processedTopics.map((topic, i) => (
-                <motion.div
+                <div
                   key={i}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
                   className={cn(
                     "px-2.5 py-1 rounded-full text-xs font-medium",
                     i === processedTopics.length - 1
@@ -554,20 +523,14 @@ export function LiveVoiceRecorder({
                   )}
                 >
                   {topic}
-                </motion.div>
+                </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
 
-        <AnimatePresence>
-          {(transcript || interimTranscript) && isSessionActive && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
+        {(transcript || interimTranscript) && isSessionActive && (
+          <div>
               <div className="space-y-1">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   Live Transcript
@@ -583,21 +546,16 @@ export function LiveVoiceRecorder({
                   </p>
                 </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
 
         {isSessionActive && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center justify-center gap-2 pt-2 border-t border-border/50"
-          >
+          <div className="flex items-center justify-center gap-2 pt-2 border-t border-border/50">
             <Sparkles className="w-3.5 h-3.5 text-primary" />
             <span className="text-xs font-medium text-muted-foreground">
               {useAI ? "AI extracting topics from speech" : "Creating branches from speech"}
             </span>
-          </motion.div>
+          </div>
         )}
       </PixelCardContent>
     </PixelCard>
